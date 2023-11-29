@@ -61,16 +61,17 @@ class StablDiffusionXLBaseDataLoader(BaseDataLoader):
 
     def _enumerate_input_modules(self, args: TrainArgs) -> list:
         supported_extensions = path_util.supported_image_extensions()
-
-        collect_paths = CollectPaths(
+        print("ENUMERATING INPUT MODULES:")
+        collect_image_paths = CollectPaths(
             concept_in_name='concept', path_in_name='path', name_in_name='name', path_out_name='image_path', concept_out_name='concept',
             extensions=supported_extensions, include_postfix=None, exclude_postfix=['-masklabel'], include_subdirectories_in_name='concept.include_subdirectories'
         )
-
         mask_path = ModifyPath(in_name='image_path', out_name='mask_path', postfix='-masklabel', extension='.png')
         sample_prompt_path = ModifyPath(in_name='image_path', out_name='sample_prompt_path', postfix='', extension='.txt')
+        sample_caption_path = ChangeDir(in_name='sample_prompt_path', out_name='sample_caption_path', postfix='', extension='.txt', replace_in='/img', replace_out='/captions')
+        sample_tag_path = ChangeDir(in_name='sample_prompt_path', out_name='sample_tag_path', postfix='', extension='.txt', replace_in='/img', replace_out='/tags')
 
-        modules = [collect_paths, sample_prompt_path]
+        modules = [collect_image_paths, sample_prompt_path, sample_caption_path, sample_tag_path]
 
         if args.masked_training:
             modules.append(mask_path)
@@ -84,16 +85,22 @@ class StablDiffusionXLBaseDataLoader(BaseDataLoader):
         load_mask = LoadImage(path_in_name='mask_path', image_out_name='mask', range_min=0, range_max=1, channels=1)
 
         load_sample_prompts = LoadMultipleTexts(path_in_name='sample_prompt_path', texts_out_name='sample_prompts')
+        load_sample_captions = LoadMultipleTexts(path_in_name='sample_caption_path', texts_out_name='sample_captions')
+        load_sample_tags = LoadMultipleTexts(path_in_name='sample_tag_path', texts_out_name='sample_tags')
+        
         load_concept_prompts = LoadMultipleTexts(path_in_name='concept.prompt_path', texts_out_name='concept_prompts')
         filename_prompt = GetFilename(path_in_name='image_path', filename_out_name='filename_prompt', include_extension=False)
         select_prompt_input = SelectInput(setting_name='concept.prompt_source', out_name='prompts', setting_to_in_name_map={
             'sample': 'sample_prompts',
+            'cap_tag': '',
             'concept': 'concept_prompts',
             'filename': 'filename_prompt',
         }, default_in_name='sample_prompts')
-        select_random_text = SelectRandomText(texts_in_name='prompts', text_out_name='prompt')
+        select_random_prompt = SelectRandomText(texts_in_name='prompts', text_out_name='prompt')
+        select_random_caption = SelectRandomText(texts_in_name='sample_captions', text_out_name='prompt_caption')
+        select_random_tag = SelectRandomText(texts_in_name='sample_tags', text_out_name='prompt_tag')
 
-        modules = [load_image, load_sample_prompts, load_concept_prompts, filename_prompt, select_prompt_input, select_random_text]
+        modules = [load_image, load_sample_prompts, load_sample_captions, load_sample_tags, load_concept_prompts, filename_prompt, select_prompt_input, select_random_prompt, select_random_caption, select_random_tag]
 
         if args.masked_training:
             modules.append(generate_mask)
@@ -171,7 +178,7 @@ class StablDiffusionXLBaseDataLoader(BaseDataLoader):
         random_contrast = RandomContrast(names=['image'], enabled_in_name='concept.enable_random_contrast', max_strength_in_name='concept.random_contrast_max_strength')
         random_saturation = RandomSaturation(names=['image'], enabled_in_name='concept.enable_random_saturation', max_strength_in_name='concept.random_saturation_max_strength')
         random_hue = RandomHue(names=['image'], enabled_in_name='concept.enable_random_hue', max_strength_in_name='concept.random_hue_max_strength')
-        shuffle_tags = ShuffleTags(text_in_name='prompt', enabled_in_name='concept.enable_tag_shuffling', delimiter_in_name='concept.tag_delimiter', keep_tags_count_in_name='concept.keep_tags_count', text_out_name='prompt')
+        shuffle_tags = ShuffleTags(text_in_name='prompt_tag', enabled_in_name='concept.enable_tag_shuffling', delimiter_in_name='concept.tag_delimiter', keep_tags_count_in_name='concept.keep_tags_count', text_out_name='prompt_tag')
 
         modules = [
             random_flip,
@@ -201,8 +208,8 @@ class StablDiffusionXLBaseDataLoader(BaseDataLoader):
         encode_image = EncodeVAE(in_name='image', out_name='latent_image_distribution', vae=model.vae, override_allow_mixed_precision=False)
         downscale_mask = Downscale(in_name='mask', out_name='latent_mask', factor=8)
         encode_conditioning_image = EncodeVAE(in_name='conditioning_image', out_name='latent_conditioning_image_distribution', vae=model.vae, override_allow_mixed_precision=False)
-        tokenize_prompt_1 = Tokenize(in_name='prompt', tokens_out_name='tokens_1', mask_out_name='tokens_mask_1', tokenizer=model.tokenizer_1, max_token_length=model.tokenizer_1.model_max_length)
-        tokenize_prompt_2 = Tokenize(in_name='prompt', tokens_out_name='tokens_2', mask_out_name='tokens_mask_2', tokenizer=model.tokenizer_2, max_token_length=model.tokenizer_2.model_max_length)
+        tokenize_prompt_1 = Tokenize(in_name='prompt_tag', tokens_out_name='tokens_1', mask_out_name='tokens_mask_1', tokenizer=model.tokenizer_1, max_token_length=model.tokenizer_1.model_max_length)
+        tokenize_prompt_2 = Tokenize(in_name='prompt_caption', tokens_out_name='tokens_2', mask_out_name='tokens_mask_2', tokenizer=model.tokenizer_2, max_token_length=model.tokenizer_2.model_max_length)
         encode_prompt_1 = EncodeClipText(in_name='tokens_1', hidden_state_out_name='text_encoder_1_hidden_state', pooled_out_name=None, text_encoder=model.text_encoder_1, hidden_state_output_index=-(2+args.text_encoder_layer_skip))
         encode_prompt_2 = EncodeClipText(in_name='tokens_2', hidden_state_out_name='text_encoder_2_hidden_state', pooled_out_name='text_encoder_2_pooled_state', text_encoder=model.text_encoder_2, hidden_state_output_index=-(2+args.text_encoder_2_layer_skip))
 

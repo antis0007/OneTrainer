@@ -213,21 +213,16 @@ def create_data_loader(
             if model_type.is_stable_diffusion_xl():
                 return StableDiffusionXLEmbeddingDataLoader(train_device, temp_device, args, model, train_progress)
 
-
-def create_optimizer(
-        parameters: Iterable[Parameter] | list[dict],
-        state_dict: dict | None,
-        args: TrainArgs,
-) -> torch.optim.Optimizer:
-    optimizer = None
-
+def generate_optimizer(parameters,args,lr=None):
+    if lr == None:
+        lr = args.learning_rate
     match args.optimizer:
 
         # SGD Optimizer
         case Optimizer.SGD:
             optimizer = torch.optim.SGD(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 momentum=args.optimizer_momentum if args.optimizer_momentum is not None else 0,
                 dampening=args.optimizer_dampening if args.optimizer_dampening is not None else 0,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
@@ -242,7 +237,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.SGD8bit(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 momentum=args.optimizer_momentum if args.optimizer_momentum is not None else 0,
                 dampening=args.optimizer_dampening if args.optimizer_dampening is not None else 0,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
@@ -253,7 +248,7 @@ def create_optimizer(
         case Optimizer.ADAM:
             optimizer = torch.optim.Adam(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.999),
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
@@ -269,7 +264,7 @@ def create_optimizer(
         case Optimizer.ADAMW:
             optimizer = torch.optim.AdamW(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.999),
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 1e-2,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
@@ -286,7 +281,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.Adam8bit(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
                 min_8bit_size=args.optimizer_min_8bit_size if args.optimizer_min_8bit_size is not None else 4096,
@@ -300,7 +295,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.AdamW8bit(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 1e-2,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
                 min_8bit_size=args.optimizer_min_8bit_size if args.optimizer_min_8bit_size is not None else 4096,
@@ -314,7 +309,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.Adagrad(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-10,
                 lr_decay=args.optimizer_lr_decay if args.optimizer_lr_decay is not None else 0,
@@ -326,7 +321,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.Adagrad8bit(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-10,
                 lr_decay=args.optimizer_lr_decay if args.optimizer_lr_decay is not None else 0,
@@ -341,7 +336,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.RMSprop(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
                 alpha=args.optimizer_alpha if args.optimizer_alpha is not None else 0.99,
@@ -354,7 +349,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.RMSprop8bit(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
                 alpha=args.optimizer_alpha if args.optimizer_alpha is not None else 0.99,
@@ -370,7 +365,7 @@ def create_optimizer(
             import lion_pytorch as lp
             optimizer = lp.Lion(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.99),
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 use_triton=args.optimizer_use_triton if args.optimizer_use_triton is not None else False,
@@ -381,7 +376,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.LARS(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 momentum=args.optimizer_momentum if args.optimizer_momentum is not None else 0,
                 dampening=args.optimizer_dampening if args.optimizer_dampening is not None else 0,
@@ -394,7 +389,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.LARS8bit(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 momentum=args.optimizer_momentum if args.optimizer_momentum is not None else 0,
                 dampening=args.optimizer_dampening if args.optimizer_dampening is not None else 0,
@@ -409,7 +404,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.LAMB(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.999),
                 bias_correction=args.optimizer_bias_correction if args.optimizer_bias_correction is not None else True,
@@ -425,7 +420,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.LAMB8bit(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.999),
                 bias_correction=args.optimizer_bias_correction if args.optimizer_bias_correction is not None else True,
@@ -442,7 +437,7 @@ def create_optimizer(
             import bitsandbytes as bnb
             optimizer = bnb.optim.Lion8bit(
                 params=parameters,
-                lr=args.learning_rate if args.learning_rate is not None else 0,
+                lr=lr if args.learning_rate is not None else 0,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.999),
                 min_8bit_size=args.optimizer_min_8bit_size if args.optimizer_min_8bit_size is not None else 4096,
@@ -456,7 +451,7 @@ def create_optimizer(
             import dadaptation as da
             optimizer = da.DAdaptSGD(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 momentum=args.optimizer_momentum if args.optimizer_momentum is not None else 0.0,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
                 log_every=args.optimizer_log_every if args.optimizer_log_every is not None else 0,
@@ -470,7 +465,7 @@ def create_optimizer(
             import dadaptation as da
             optimizer = da.DAdaptAdam(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.999),
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0,
@@ -487,7 +482,7 @@ def create_optimizer(
             import dadaptation as da
             optimizer = da.DAdaptAdan(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.98, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.92, args.optimizer_beta3 if args.optimizer_beta3 is not None else 0.99),
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0.02,
@@ -502,7 +497,7 @@ def create_optimizer(
             import dadaptation as da
             optimizer = da.DAdaptAdaGrad(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 momentum=args.optimizer_momentum if args.optimizer_momentum is not None else 0,
                 log_every=args.optimizer_log_every if args.optimizer_log_every is not None else 0,
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0.0,
@@ -516,7 +511,7 @@ def create_optimizer(
             import dadaptation as da
             optimizer = da.DAdaptLion(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.999),
                 weight_decay=args.optimizer_weight_decay if args.optimizer_weight_decay is not None else 0.0,
                 log_every=args.optimizer_log_every if args.optimizer_log_every is not None else 0,
@@ -529,7 +524,7 @@ def create_optimizer(
             import prodigyopt
             optimizer = prodigyopt.Prodigy(
                 params=parameters,
-                lr=args.learning_rate,
+                lr=lr,
                 betas=(args.optimizer_beta1 if args.optimizer_beta1 is not None else 0.9, args.optimizer_beta2 if args.optimizer_beta2 is not None else 0.999),
                 beta3=args.optimizer_beta3 if args.optimizer_beta3 is not None else None,
                 eps=args.optimizer_eps if args.optimizer_eps is not None else 1e-8,
@@ -549,7 +544,7 @@ def create_optimizer(
             
             optimizer = Adafactor(
                 params=parameters,
-                lr= None if args.optimizer_relative_step == True else args.learning_rate,
+                lr= None if args.optimizer_relative_step == True else lr,
                 eps=(args.optimizer_eps if args.optimizer_eps is not None else 1e-30, args.optimizer_eps2 if args.optimizer_eps2 is not None else 1e-3),
                 clip_threshold=args.optimizer_clip_threshold if args.optimizer_clip_threshold is not None else 1.0,
                 decay_rate=args.optimizer_decay_rate if args.optimizer_decay_rate is not None else -0.8,
@@ -559,17 +554,41 @@ def create_optimizer(
                 relative_step=args.optimizer_relative_step if args.optimizer_relative_step is not None else True,
                 warmup_init=args.optimizer_warmup_init if args.optimizer_warmup_init is not None else False,
             )
-
-    if state_dict is not None:
-        for i, params in enumerate(parameters):
-            state_dict['param_groups'][i]['lr'] = params['lr']
-            state_dict['param_groups'][i]['initial_lr'] = params['initial_lr']
-
-        # TODO: this will break if the optimizer class changed during a restart
-        optimizer.load_state_dict(state_dict)
-
     return optimizer
 
+def create_optimizer(
+        parameters: Iterable[Parameter] | list[dict],
+        state_dict: dict | None,
+        args: TrainArgs,
+) -> torch.optim.Optimizer:
+    optimizer = None
+    if args.optimizer_multi_optimize == False:
+        optimizer = generate_optimizer(parameters, args)
+        if state_dict is not None:
+            for i, params in enumerate(parameters):
+                state_dict['param_groups'][i]['lr'] = params['lr']
+                state_dict['param_groups'][i]['initial_lr'] = params['initial_lr']
+
+            # TODO: this will break if the optimizer class changed during a restart
+            optimizer.load_state_dict(state_dict)
+        return optimizer
+    elif args.optimizer_multi_optimize == True: #multi-optimizer training
+        optimizers = []
+        enabled = [args.train_text_encoder, args.train_text_encoder_2,args.train_unet]
+        for i in range(0, len(enabled)):
+            if enabled[i] == True:
+                next_params = parameters.pop(0)
+                params = next_params['params']
+                lr = next_params['lr']
+                initial_lr = next_params['lr']
+                optimizer = generate_optimizer(params, args, lr=lr)
+                if state_dict is not None:
+                    state_dict['param_groups'][i]['lr'] = lr
+                    state_dict['param_groups'][i]['initial_lr'] = initial_lr
+                    optimizer.load_state_dict(state_dict['param_groups'][i])
+                optimizers.append(optimizer)
+        print(optimizers)
+        return optimizers
 
 def create_ema(
         parameters: Iterable[Parameter] | list[dict],

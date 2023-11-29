@@ -18,7 +18,7 @@ class ConceptWindow(ctk.CTkToplevel):
         self.ui_state = ui_state
 
         self.title("Concept")
-        self.geometry("800x450")
+        self.geometry("1000x850")
         self.resizable(False, False)
         self.wait_visibility()
         self.grab_set()
@@ -65,15 +65,24 @@ class ConceptWindow(ctk.CTkToplevel):
 
         components.options_kv(master, 2, 1, [
             ("From text file per sample", 'sample'),
+            ("From caption+tag file per sample", 'cap_tag'),
             ("From single text file", 'concept'),
             ("From image file name", 'filename'),
         ], self.ui_state, "prompt_source", command=set_prompt_path_entry_enabled)
         set_prompt_path_entry_enabled(concept.prompt_source)
 
+
+        components.label(master, 3, 0, "[OPTIONAL] Caption Source Dir",
+                         tooltip="The source for prompts used during training. When selecting \"From single text file\", select a text file that contains a list of prompts")
+        caption_dir_entry = components.dir_entry(master, 3, 1, self.ui_state, "caption_dir")
+        components.label(master, 4, 0, "[OPTIONAL] Tag Source Dir",
+                         tooltip="The source for prompts used during training. When selecting \"From single text file\", select a text file that contains a list of prompts")
+        tag_dir_entry = components.dir_entry(master, 4, 1, self.ui_state, "tag_dir")
+
         # include subdirectories
-        components.label(master, 3, 0, "Include Subdirectories",
+        components.label(master, 5, 0, "Include Subdirectories",
                          tooltip="Includes images from subdirectories into the dataset")
-        components.switch(master, 3, 1, self.ui_state, "include_subdirectories")
+        components.switch(master, 5, 1, self.ui_state, "include_subdirectories")
 
     def __image_augmentation_tab(self, master):
         master.grid_columnconfigure(0, weight=0)

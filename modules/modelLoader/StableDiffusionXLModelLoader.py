@@ -67,7 +67,19 @@ class StableDiffusionXLModelLoader(BaseModelLoader, ModelLoaderModelSpecMixin, M
 
         # optimizer
         try:
-            model.optimizer_state_dict = torch.load(os.path.join(base_model_name, "optimizer", "optimizer.pt"))
+            # Check if the optimizer is a list
+            if isinstance(model.optimizer, list):
+                model.optimizer_state_dict = [] #override this to a list when doing multi-optimizer training
+                for i in range(len(model.optimizer)):
+                    optimizer_path = os.path.join(base_model_name, "optimizer", f"optimizer_{i}.pt")
+                    temp = torch.load(optimizer_path)
+                    model.optimizer_state_dict.append(temp)
+                    model.optimizer[i].load_state_dict(temp)
+            else:
+                optimizer_path = os.path.join(base_model_name, "optimizer", "optimizer.pt")
+                temp = torch.load(optimizer_path)
+                model.optimizer_state_dict = temp
+                model.optimizer.load_state_dict(temp)
         except FileNotFoundError:
             pass
 

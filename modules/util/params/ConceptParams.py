@@ -34,6 +34,8 @@ class ConceptParams(BaseParams):
         args["path"] = ""
         args["prompt_source"] = "sample"
         args["prompt_path"] = ""
+        args["caption_dir"] = ""
+        args["tag_dir"] = ""
         args["enable_crop_jitter"] = True
         args["enable_random_flip"] = True
         args["enable_random_rotate"] = False

@@ -98,7 +98,11 @@ class StableDiffusionXLModelSaver(BaseModelSaver):
 
         # optimizer
         os.makedirs(os.path.join(destination, "optimizer"), exist_ok=True)
-        torch.save(model.optimizer.state_dict(), os.path.join(destination, "optimizer", "optimizer.pt"))
+        if isinstance(model.optimizer, list):
+            for i in range(0, len(model.optimizer)):
+                torch.save(model.optimizer[i].state_dict(), os.path.join(destination, "optimizer", f"optimizer_{i}.pt"))
+        else:
+            torch.save(model.optimizer.state_dict(), os.path.join(destination, "optimizer", "optimizer.pt"))
 
         # ema
         if model.ema:

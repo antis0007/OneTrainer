@@ -117,6 +117,11 @@ class TrainingTab:
                          tooltip="Number of accumulation steps. Increase this number to trade batch size for training speed")
         components.entry(frame, 7, 1, self.ui_state, "gradient_accumulation_steps")
 
+        # debiased loss
+        components.label(frame, 8, 0, "Debiased Loss",
+                         tooltip="Enables debiased loss calculation (min-snr gamma replacement)")
+        components.switch(frame, 8, 1, self.ui_state, "debiased_loss")
+
     def __create_base2_frame(self, master, row):
         frame = ctk.CTkFrame(master=master, corner_radius=5)
         frame.grid(row=row, column=0, padx=5, pady=5, sticky="nsew")

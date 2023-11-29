@@ -69,7 +69,7 @@ class TrainArgs(BaseArgs):
     align_prop_steps: int
     align_prop_truncate_steps: float
     align_prop_cfg_scale: float
-
+    debiased_loss: bool
     # vae
     vae_weight_dtype: DataType
 
@@ -119,6 +119,9 @@ class TrainArgs(BaseArgs):
 
     # optimizer settings
     optimizer: Optimizer
+    optimizer_multi_optimize: bool
+    optimizer_multi_list: str
+    optimizer_multi_params_list: str
     optimizer_weight_decay: float
     optimizer_momentum: float
     optimizer_dampening: float
@@ -271,6 +274,8 @@ class TrainArgs(BaseArgs):
         parser.add_argument("--align-prop-steps", type=int, required=False, default=20, dest="align_prop_steps", help="Number of inference steps for each AlignProp step")
         parser.add_argument("--align-prop-truncate-steps", type=float, required=False, default=0.5, dest="align_prop_truncate_steps", help="Fraction of steps to randomly truncate when using AlignProp")
         parser.add_argument("--align-prop-cfg-scale", type=float, required=False, default=7.0, dest="align_prop_cfg_scale", help="CFG Scale for inference steps of AlignProp calculations")
+        parser.add_argument("--debiased-loss", type=nullable_bool, required=False, default=False, dest="debiased_loss", help="Enables debiased loss calculation (min-snr gamma replacement)")
+        
 
         # vae
         parser.add_argument("--vae-weight-dtype", type=DataType, required=False, default=DataType.NONE, dest="vae_weight_dtype", help="The data type to use for vae weights during training", choices=list(DataType))
@@ -363,6 +368,10 @@ class TrainArgs(BaseArgs):
         parser.add_argument("--optimizer-warmup-init", type=nullable_bool, default=None, dest="optimizer_warmup_init", help='Whether to warm-up the optimizer initialization.')
         parser.add_argument("--optimizer-weight-decay", type=float, default=None, dest="optimizer_weight_decay", help='Regularization to prevent overfitting.')
 
+        parser.add_argument("--optimizer-multi-optimize", type=nullable_bool, default=False, dest="optimizer_multi_optimize", help='(EXPERIMENTAL) Enables multiple optimizers.')
+        parser.add_argument("--optimizer-multi-list", type=str, default=None, dest="optimizer_multi_list", help='(EXPERIMENTAL) List of multiple optimizer strings')
+        parser.add_argument("--optimizer-multi-params-list", type=str, default=None, dest="optimizer_multi_params_list", help='(EXPERIMENTAL) Param group sizes e.g [2,1] gives first 2 params to the first optimizer, then 1 param to the next optimizer (load order:[te_1,te_2,unet])')
+
         # sample settings
         parser.add_argument("--sample-definition-file-name", type=str, required=True, dest="sample_definition_file_name", help="The json file containing the sample definition")
         parser.add_argument("--sample-after", type=float, required=True, dest="sample_after", help="The interval to sample")
@@ -441,6 +450,7 @@ class TrainArgs(BaseArgs):
         data.append(("align_prop_steps", 20, int, False))
         data.append(("align_prop_truncate_steps", 0.5, float, False))
         data.append(("align_prop_cfg_scale", 7.0, float, False))
+        data.append(("debiased_loss", False, bool, False))
 
         # vae
         data.append(("vae_weight_dtype", DataType.FLOAT_32, DataType, False))
@@ -533,6 +543,9 @@ class TrainArgs(BaseArgs):
         data.append(("optimizer_use_triton", None, bool, True))
         data.append(("optimizer_warmup_init", None, bool, True))
         data.append(("optimizer_weight_decay", None, float, True))
+        data.append(("optimizer_multi_optimize", None, bool, True))
+        data.append(("optimizer_multi_list", None, str, True))
+        data.append(("optimizer_multi_params_list", None, str, True))
 
         # sample settings
         data.append(("sample_definition_file_name", "training_samples/samples.json", str, False))

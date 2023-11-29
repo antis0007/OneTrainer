@@ -375,6 +375,7 @@ class BaseStableDiffusionSetup(
             args: TrainArgs,
     ) -> Tensor:
         return self._diffusion_loss(
+            model=model,
             batch=batch,
             data=data,
             args=args,

@@ -102,6 +102,9 @@ class OptimizerParamsWindow(ctk.CTkToplevel):
             'optimizer_use_triton': {'title': 'Use Triton', 'tooltip': 'Whether Triton optimization should be used.', 'type': 'bool'},
             'optimizer_warmup_init': {'title': 'Warmup Initialization', 'tooltip': 'Whether to warm-up the optimizer initialization.', 'type': 'bool'},
             'optimizer_weight_decay': {'title': 'Weight Decay', 'tooltip': 'Regularization to prevent overfitting.', 'type': 'float'},
+            'optimizer_multi_optimize': {'title': 'Multiple Optimizers', 'tooltip': '(EXPERIMENTAL) Enables multiple optimizers, designed for training SDXL TE1/TE2/UNET together.', 'type': 'bool'},
+            'optimizer_multi_list': {'title': 'Multi-Optimizer List', 'tooltip': '(EXPERIMENTAL) List of multiple optimizer strings', 'type': 'str'},
+            'optimizer_multi_params_list': {'title': 'Param Group Sizes', 'tooltip': '(EXPERIMENTAL) Param group sizes e.g [2,1] gives first 2 params to the first optimizer, then 1 param to the next optimizer (load order:[te_1,te_2,unet])', 'type': 'str'},
         }
         # @formatter:on
 
@@ -150,11 +153,16 @@ class OptimizerParamsWindow(ctk.CTkToplevel):
         # Create the optimizer dropdown menu and set the command
         optimizer_menu = components.options(master, 0, 1, [str(x) for x in list(Optimizer)], self.ui_state, "optimizer",
                                              command=self.on_optimizer_change)
-
+        #"optimizer_multi_optimize": False,
+        components.label(master, 0, 2, "Multiple Optimizers",
+                         tooltip="(EXPERIMENTAL) Enables multiple optimizers, designed for training SDXL TE1/TE2/UNET")
+        multi_optimizer_bool = components.switch(master, 0, 3, self.ui_state, "optimizer_multi_optimize")
+        #"optimizer_multi_list":"",
+        #"optimizer_multi_params_list":"",
         # Defaults Button
-        components.label(master, 0, 3, "Optimizer Defaults",
+        components.label(master, 0, 4, "Optimizer Defaults",
                          tooltip="Load default settings for the selected optimizer")
-        components.button(self.frame, 0, 4, "Load Defaults", self.load_defaults,
+        components.button(self.frame, 0, 5, "Load Defaults", self.load_defaults,
                           tooltip="Load default settings for the selected optimizer")
 
         selected_optimizer = self.ui_state.vars['optimizer'].get()

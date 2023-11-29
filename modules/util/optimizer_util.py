@@ -56,6 +56,10 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_scale_parameter": True,
         "optimizer_relative_step": True,
         "optimizer_warmup_init": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
+
     },
     "ADAGRAD": {
         "optimizer_lr_decay": 0,
@@ -66,6 +70,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_min_8bit_size": 4096,
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": True,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "ADAGRAD_8BIT": {
         "optimizer_lr_decay": 0,
@@ -76,6 +83,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_min_8bit_size": 4096,
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": True,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "ADAM_8BIT": {
         "optimizer_beta1": 0.9,
@@ -88,6 +98,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": True,
         "optimizer_is_paged": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "ADAMW_8BIT": {
         "optimizer_beta1": 0.9,
@@ -100,6 +113,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": True,
         "optimizer_is_paged": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "LAMB": {
         "optimizer_bias_correction": True,
@@ -114,6 +130,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": False,
         "optimizer_max_unorm": 1.0,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "LAMB_8BIT": {
         "optimizer_bias_correction": True,
@@ -127,6 +146,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": False,
         "optimizer_max_unorm": 1.0,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "LARS": {
         "optimizer_momentum": 0,
@@ -137,6 +159,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_min_8bit_size": 4096,
         "optimizer_percentile_clipping": 100,
         "optimizer_max_unorm": 0.02,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "LARS_8BIT": {
         "optimizer_momentum": 0,
@@ -146,6 +171,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_min_8bit_size": 4096,
         "optimizer_percentile_clipping": 100,
         "optimizer_max_unorm": 0.02,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "LION_8BIT": {
         "optimizer_beta1": 0.9,
@@ -155,6 +183,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": True,
         "optimizer_is_paged": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "RMSPROP": {
         "optimizer_alpha": 0.99,
@@ -166,6 +197,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_min_8bit_size": 4096,
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": True,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "RMSPROP_8BIT": {
         "optimizer_alpha": 0.99,
@@ -176,6 +210,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_min_8bit_size": 4096,
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": True,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "SGD_8BIT": {
         "optimizer_momentum": 0,
@@ -185,6 +222,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_min_8bit_size": 4096,
         "optimizer_percentile_clipping": 100,
         "optimizer_block_wise": True,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "PRODIGY": {
         "optimizer_beta1": 0.9,
@@ -199,6 +239,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_d_coef": 1.0,
         "optimizer_growth_rate": float('inf'),
         "optimizer_fsdp_in_use": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "DADAPT_ADA_GRAD": {
         "optimizer_momentum": 0,
@@ -207,6 +250,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_eps": 0.0,
         "optimizer_d0": 1e-6,
         "optimizer_growth_rate": float('inf'),
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "DADAPT_ADAN": {
         "optimizer_beta1": 0.98,
@@ -218,6 +264,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_log_every": 0,
         "optimizer_d0": 1e-6,
         "optimizer_growth_rate": float('inf'),
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "DADAPT_ADAM": {
         "optimizer_beta1": 0.9,
@@ -230,6 +279,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_d0": 1e-6,
         "optimizer_growth_rate": float('inf'),
         "optimizer_fsdp_in_use": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "DADAPT_SGD": {
         "optimizer_momentum": 0.0,
@@ -238,6 +290,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_d0": 1e-6,
         "optimizer_growth_rate": float('inf'),
         "optimizer_fsdp_in_use": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "DADAPT_LION": {
         "optimizer_beta1": 0.9,
@@ -246,6 +301,9 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_log_every": 0,
         "optimizer_d0": 1e-6,
         "optimizer_fsdp_in_use": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "ADAM": {
         "optimizer_beta1": 0.9,
@@ -257,7 +315,10 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_maximize": False,
         "optimizer_capturable": False,
         "optimizer_differentiable": False,
-        "optimizer_fused": True
+        "optimizer_fused": True,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "ADAMW": {
         "optimizer_beta1": 0.9,
@@ -269,7 +330,10 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_maximize": False,
         "optimizer_capturable": False,
         "optimizer_differentiable": False,
-        "optimizer_fused": True
+        "optimizer_fused": True,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "SGD": {
         "optimizer_momentum": 0,
@@ -278,12 +342,22 @@ OPTIMIZER_KEY_MAP = {
         "optimizer_nesterov": False,
         "optimizer_foreach": False,
         "optimizer_maximize": False,
-        "optimizer_differentiable": False
+        "optimizer_differentiable": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
     "LION": {
         "optimizer_beta1": 0.9,
         "optimizer_beta2": 0.99,
         "optimizer_weight_decay": 0.0,
-        "optimizer_use_triton": False
+        "optimizer_use_triton": False,
+        "optimizer_multi_optimize": False,
+        "optimizer_multi_list":"",
+        "optimizer_multi_params_list":"",
     },
 }
+#Note:
+#Add to all?
+#for optimizer in OPTIMIZER_KEY_MAP.keys():
+    #(OPTIMIZER_KEY_MAP[optimizer])['optimizer_multi_optimize'] = False
