@@ -256,11 +256,10 @@ def create_data_loader(
             if model_type.is_wuerstchen():
                 return WuerstchenEmbeddingDataLoader(train_device, temp_device, args, model, train_progress)
 
-def generate_optimizer(parameters,args,lr=None):
+def generate_optimizer(parameters,state_dict,args,lr=None):
     if lr == None:
         lr = args.learning_rate
     match args.optimizer:
-
         # SGD Optimizer
         case Optimizer.SGD:
             optimizer = torch.optim.SGD(
@@ -653,7 +652,7 @@ def create_optimizer(
                 params = next_params['params']
                 lr = next_params['lr']
                 initial_lr = next_params['lr']
-                optimizer = generate_optimizer(params, args, lr=lr)
+                optimizer = generate_optimizer(params, state_dict, args, lr=lr)
                 if state_dict is not None:
                     state_dict['param_groups'][i]['lr'] = lr
                     state_dict['param_groups'][i]['initial_lr'] = initial_lr

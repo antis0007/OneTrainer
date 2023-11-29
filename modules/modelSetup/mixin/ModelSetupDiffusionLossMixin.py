@@ -30,7 +30,23 @@ def compute_snr(timesteps, alphas_cumprod):
         # Compute SNR.
         snr = (alpha / sigma) ** 2
         return snr
+def prepare_scheduler_for_custom_training(noise_scheduler, device):
+    if hasattr(noise_scheduler, "all_snr"):
+        return
+    alphas_cumprod = noise_scheduler.alphas_cumprod
+    sqrt_alphas_cumprod = torch.sqrt(alphas_cumprod)
+    sqrt_one_minus_alphas_cumprod = torch.sqrt(1.0 - alphas_cumprod)
+    alpha = sqrt_alphas_cumprod
+    sigma = sqrt_one_minus_alphas_cumprod
+    all_snr = (alpha / sigma) ** 2
 
+    noise_scheduler.all_snr = all_snr.to(device)
+def apply_debiased_estimation(loss, timesteps, noise_scheduler):
+    snr_t = torch.stack([noise_scheduler.all_snr[t] for t in timesteps])  # batch_size
+    snr_t = torch.minimum(snr_t, torch.ones_like(snr_t) * 1000)  # if timestep is 0, snr_t is inf, so limit it to 1000
+    weight = 1/torch.sqrt(snr_t)
+    loss = weight * loss
+    return loss
 class ModelSetupDiffusionLossMixin(metaclass=ABCMeta):
     def __init__(self):
         super(ModelSetupDiffusionLossMixin, self).__init__()
@@ -88,33 +104,41 @@ class ModelSetupDiffusionLossMixin(metaclass=ABCMeta):
                 ).mean([1, 2, 3])
             else:
                 if (hasattr(model, "noise_scheduler") and args.debiased_loss == True):
-                    # timesteps = torch.randint(
-                    #     low=0,
-                    #     high=int(model.noise_scheduler.config['num_train_timesteps'] * args.max_noising_strength),
-                    #     size=(data['predicted'].shape[0],),
-                    #     device=args.train_device,
-                    # ).long()
+                    #print("TEST:")
+                    #for key,val in model.noise_scheduler.config.items():
+                        #print(key, ": ", val)
+
+                    timesteps = torch.randint(
+                        low=0,
+                        high=int(model.noise_scheduler.config['num_train_timesteps'] * args.max_noising_strength),
+                        size=(data['predicted'].shape[0],),
+                        device=args.train_device,
+                    ).long()
                     #Training Details. We set T = 1000 for all experiments. We implement the proposed approach
                     #on top of ADM (Dhariwal & Nichol, 2021), which offers well-designed architecture and efficient
                     #sampling. We train our model for 500K iterations with a batch size of 8
                     # Compute SNR
                     #timestep = model.noise_scheduler.timesteps[-1]
-                    timestep = 999 #[0-999] = 1000 timesteps
-                    alphas_cumprod = model.noise_scheduler.alphas_cumprod.to(args.train_device)
-                    alpha_prod = alphas_cumprod[timestep]
-                    snr = alpha_prod / (1 - alpha_prod)
+                    #timestep = 999 #[0-999] = 1000 timesteps
+                    
+                    #alphas_cumprod = model.noise_scheduler.alphas_cumprod.to(args.train_device)
+                    #alpha_prod = alphas_cumprod[timestep]
+                    #snr = alpha_prod / (1 - alpha_prod)
 
                     #timesteps = model.noise_scheduler.timesteps
                     #alphas_cumprod = model.noise_scheduler.alphas_cumprod.to(args.train_device)
                     #snr = compute_snr(timesteps, alphas_cumprod)
-                    weight = 1 / torch.sqrt(snr)
+                    #weight = 1 / torch.sqrt(snr)
+                    prepare_scheduler_for_custom_training(model.noise_scheduler, args.train_device)
+
                     # Apply weighted loss
                     mse_loss = F.mse_loss(
                         data['predicted'],
                         data['target'],
                         reduction='none'
                     ).mean([1, 2, 3])
-                    losses = weight * mse_loss
+                    losses = apply_debiased_estimation(mse_loss, timesteps, model.noise_scheduler)
+                    #losses = weight * mse_loss
                 else:
                     losses = F.mse_loss(
                         data['predicted'],

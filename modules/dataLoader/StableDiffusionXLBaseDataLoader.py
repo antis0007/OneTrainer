@@ -68,8 +68,8 @@ class StablDiffusionXLBaseDataLoader(BaseDataLoader):
         )
         mask_path = ModifyPath(in_name='image_path', out_name='mask_path', postfix='-masklabel', extension='.png')
         sample_prompt_path = ModifyPath(in_name='image_path', out_name='sample_prompt_path', postfix='', extension='.txt')
-        sample_caption_path = ChangeDir(in_name='sample_prompt_path', out_name='sample_caption_path', postfix='', extension='.txt', replace_in='/img', replace_out='/captions')
-        sample_tag_path = ChangeDir(in_name='sample_prompt_path', out_name='sample_tag_path', postfix='', extension='.txt', replace_in='/img', replace_out='/tags')
+        sample_caption_path = ModifyPath(in_name='sample_prompt_path', out_name='sample_caption_path', postfix='', extension='.txt')
+        sample_tag_path = ModifyPath(in_name='sample_prompt_path', out_name='sample_tag_path', postfix='', extension='.txt')
 
         modules = [collect_image_paths, sample_prompt_path, sample_caption_path, sample_tag_path]
 
@@ -210,8 +210,8 @@ class StablDiffusionXLBaseDataLoader(BaseDataLoader):
         encode_conditioning_image = EncodeVAE(in_name='conditioning_image', out_name='latent_conditioning_image_distribution', vae=model.vae, override_allow_mixed_precision=False)
         tokenize_prompt_1 = Tokenize(in_name='prompt_tag', tokens_out_name='tokens_1', mask_out_name='tokens_mask_1', tokenizer=model.tokenizer_1, max_token_length=model.tokenizer_1.model_max_length)
         tokenize_prompt_2 = Tokenize(in_name='prompt_caption', tokens_out_name='tokens_2', mask_out_name='tokens_mask_2', tokenizer=model.tokenizer_2, max_token_length=model.tokenizer_2.model_max_length)
-        encode_prompt_1 = EncodeClipText(in_name='tokens_1', hidden_state_out_name='text_encoder_1_hidden_state', pooled_out_name=None, text_encoder=model.text_encoder_1, hidden_state_output_index=-(2+args.text_encoder_layer_skip))
-        encode_prompt_2 = EncodeClipText(in_name='tokens_2', hidden_state_out_name='text_encoder_2_hidden_state', pooled_out_name='text_encoder_2_pooled_state', text_encoder=model.text_encoder_2, hidden_state_output_index=-(2+args.text_encoder_2_layer_skip))
+        encode_prompt_1 = EncodeClipText(in_name='tokens_1', hidden_state_out_name='text_encoder_1_hidden_state', pooled_out_name=None, add_layer_norm=False, text_encoder=model.text_encoder_1, hidden_state_output_index=-(2+args.text_encoder_layer_skip))
+        encode_prompt_2 = EncodeClipText(in_name='tokens_2', hidden_state_out_name='text_encoder_2_hidden_state', pooled_out_name='text_encoder_2_pooled_state', add_layer_norm=False, text_encoder=model.text_encoder_2, hidden_state_output_index=-(2+args.text_encoder_2_layer_skip))
 
         modules = [
             rescale_image, encode_image,
