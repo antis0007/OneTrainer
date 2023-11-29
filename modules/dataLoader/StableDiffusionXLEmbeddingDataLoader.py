@@ -1,7 +1,6 @@
 from mgds.GenericDataLoaderModules import *
 
 from modules.dataLoader.StableDiffusionXLBaseDataLoader import StablDiffusionXLBaseDataLoader
-from modules.model.StableDiffusionModel import StableDiffusionModel
 from modules.model.StableDiffusionXLModel import StableDiffusionXLModel
 from modules.util.TrainProgress import TrainProgress
 from modules.util.args.TrainArgs import TrainArgs
@@ -24,7 +23,7 @@ class StableDiffusionXLEmbeddingDataLoader(StablDiffusionXLBaseDataLoader):
             train_progress,
         )
 
-    def _load_input_modules(self, args: TrainArgs, model: StableDiffusionModel) -> list:
+    def _load_input_modules(self, args: TrainArgs, model: StableDiffusionXLModel) -> list:
         modules = super(StableDiffusionXLEmbeddingDataLoader, self)._load_input_modules(args, model)
 
         tokens = [f"<embedding_{i}>" for i in range(model.embeddings[0].token_count)]

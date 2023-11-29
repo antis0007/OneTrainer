@@ -53,6 +53,8 @@ class TrainingTab:
             self.__setup_stable_diffusion_ui(column_0, column_1, column_2)
         elif self.train_args.model_type.is_stable_diffusion_xl():
             self.__setup_stable_diffusion_xl_ui(column_0, column_1, column_2)
+        elif self.train_args.model_type.is_wuerstchen():
+            self.__setup_wuerstchen_ui(column_0, column_1, column_2)
 
     def __setup_stable_diffusion_ui(self, column_0, column_1, column_2):
         self.__create_base_frame(column_0, 0)
@@ -70,6 +72,12 @@ class TrainingTab:
         self.__create_unet_frame(column_1, 1)
         self.__create_masked_frame(column_2, 1)
         self.__create_text_encoder_2_frame(column_0, 2)
+
+    def __setup_wuerstchen_ui(self, column_0, column_1, column_2):
+        self.__create_base_frame(column_0, 0)
+        self.__create_base2_frame(column_1, 0)
+        self.__create_prior_frame(column_2, 0)
+        self.__create_text_encoder_frame(column_2, 1)
 
     def __create_base_frame(self, master, row):
         frame = ctk.CTkFrame(master=master, corner_radius=5)
@@ -285,17 +293,17 @@ class TrainingTab:
 
         # train unet
         components.label(frame, 0, 0, "Train UNet",
-                         tooltip="Enables training the U-Net model")
+                         tooltip="Enables training the UNet model")
         components.switch(frame, 0, 1, self.ui_state, "train_unet")
 
         # train unet epochs
         components.label(frame, 1, 0, "Train UNet Epochs",
-                         tooltip="Number of epochs to train the U-Net")
+                         tooltip="Number of epochs to train the UNet")
         components.entry(frame, 1, 1, self.ui_state, "train_unet_epochs")
 
         # unet learning rate
-        components.label(frame, 2, 0, "Unet Learning Rate",
-                         tooltip="The learning rate of the U-Net. Overrides the base learning rate")
+        components.label(frame, 2, 0, "UNet Learning Rate",
+                         tooltip="The learning rate of the UNet. Overrides the base learning rate")
         components.entry(frame, 2, 1, self.ui_state, "unet_learning_rate")
 
         # offset noise weight
@@ -314,6 +322,40 @@ class TrainingTab:
         components.switch(frame, 5, 1, self.ui_state, "rescale_noise_scheduler_to_zero_terminal_snr")
 
         # max noising strength
+        components.label(frame, 6, 0, "Max Noising Strength",
+                         tooltip="Specifies the maximum noising strength used during training. This can be useful to reduce overfitting, but also reduces the impact of training samples on the overall image composition")
+        components.entry(frame, 6, 1, self.ui_state, "max_noising_strength")
+
+    def __create_prior_frame(self, master, row):
+        frame = ctk.CTkFrame(master=master, corner_radius=5)
+        frame.grid(row=row, column=0, padx=5, pady=5, sticky="nsew")
+
+        # train prior
+        components.label(frame, 0, 0, "Train Prior",
+                         tooltip="Enables training the Prior model")
+        components.switch(frame, 0, 1, self.ui_state, "train_prior")
+
+        # train prior epochs
+        components.label(frame, 1, 0, "Train Prior Epochs",
+                         tooltip="Number of epochs to train the Prior")
+        components.entry(frame, 1, 1, self.ui_state, "train_prior_epochs")
+
+        # prior learning rate
+        components.label(frame, 2, 0, "Prior Learning Rate",
+                         tooltip="The learning rate of the Prior. Overrides the base learning rate")
+        components.entry(frame, 2, 1, self.ui_state, "prior_learning_rate")
+
+        # prior offset noise weight
+        components.label(frame, 3, 0, "Offset Noise Weight",
+                         tooltip="The weight of offset noise added to each training step")
+        components.entry(frame, 3, 1, self.ui_state, "offset_noise_weight")
+
+        # prior perturbation noise weight
+        components.label(frame, 4, 0, "Perturbation Noise Weight",
+                         tooltip="The weight of perturbation noise added to each training step")
+        components.entry(frame, 4, 1, self.ui_state, "perturbation_noise_weight")
+
+        # prior max noising strength
         components.label(frame, 6, 0, "Max Noising Strength",
                          tooltip="Specifies the maximum noising strength used during training. This can be useful to reduce overfitting, but also reduces the impact of training samples on the overall image composition")
         components.entry(frame, 6, 1, self.ui_state, "max_noising_strength")

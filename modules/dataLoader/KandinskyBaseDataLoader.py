@@ -211,9 +211,9 @@ class KandinskyBaseDataLoader(BaseDataLoader):
         rescale_image = RescaleImageChannels(image_in_name='image', image_out_name='image', in_range_min=0, in_range_max=1, out_range_min=-1, out_range_max=1)
         rescale_conditioning_image = RescaleImageChannels(image_in_name='conditioning_image', image_out_name='conditioning_image', in_range_min=0, in_range_max=1, out_range_min=-1, out_range_max=1)
         encode_image = EncodeMoVQ(in_name='image', out_name='latent_image', movq=model.movq)
-        downscale_mask = Downscale(in_name='mask', out_name='latent_mask', factor=8)
+        downscale_mask = ScaleImage(in_name='mask', out_name='latent_mask', factor=0.125)
         encode_conditioning_image = EncodeMoVQ(in_name='conditioning_image', out_name='latent_conditioning_image', movq=model.movq)
-        downscale_depth = Downscale(in_name='depth', out_name='latent_depth', factor=8)
+        downscale_depth = ScaleImage(in_name='depth', out_name='latent_depth', factor=0.125)
         prior_embedding = KandinskyPrior(in_name='prompt', out_name='prior_embedding', prior_pipeline=model.create_prior_pipeline())
         tokenize_prompt = Tokenize(in_name='prompt', tokens_out_name='tokens', mask_out_name='tokens_mask', tokenizer=model.tokenizer, max_token_length=77)
 
@@ -296,7 +296,7 @@ class KandinskyBaseDataLoader(BaseDataLoader):
 
         decode_image = DecodeMoVQ(in_name='latent_image', out_name='decoded_image', movq=model.movq)
         decode_conditioning_image = DecodeMoVQ(in_name='latent_conditioning_image', out_name='decoded_conditioning_image', movq=model.movq)
-        upscale_mask = Upscale(in_name='latent_mask', out_name='decoded_mask', factor=8)
+        upscale_mask = ScaleImage(in_name='latent_mask', out_name='decoded_mask', factor=8)
         #decode_prompt = DecodeTokens(in_name='tokens', out_name='decoded_prompt', tokenizer=model.tokenizer)
         save_image = SaveImage(image_in_name='decoded_image', original_path_in_name='image_path', path=debug_dir, in_range_min=-1, in_range_max=1)
         save_conditioning_image = SaveImage(image_in_name='decoded_conditioning_image', original_path_in_name='image_path', path=debug_dir, in_range_min=-1, in_range_max=1)
